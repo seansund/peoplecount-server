@@ -7,23 +7,6 @@
 	"type": "tab",
 	"label": "Flow 2"
 },{
-	"id": "83391ffc.98fdc",
-	"type": "mqtt-broker",
-	"z": "",
-	"broker": "ethpi",
-	"port": "1883",
-	"clientid": "a:ORG_ID:DEVICE_ID",
-	"usetls": false,
-	"compatmode": true,
-	"keepalive": "60",
-	"cleansession": true,
-	"willTopic": "",
-	"willQos": "0",
-	"willPayload": "",
-	"birthTopic": "",
-	"birthQos": "0",
-	"birthPayload": ""
-},{
 	"id": "965898a2.0af548",
 	"type": "mqtt-broker",
 	"z": "",

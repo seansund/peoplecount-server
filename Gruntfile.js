@@ -29,6 +29,10 @@ module.exports = function(grunt) {
 							replacement: function(match, p1, p2) {
 								return p1 + (parseInt(p2) + 10);
 							}
+						},
+						{
+							match: /"broker": "localhost"/g,
+							replacement: '"broker": "ethpi"'
 						}
 					]
 				},

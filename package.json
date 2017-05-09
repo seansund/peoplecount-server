@@ -1,0 +1,23 @@
+{
+  "name": "peoplecount-server",
+  "description": "peoplecount-server description",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "grunt && node-red --userDir ./dist --settings ./dist/settings.js flow.json",
+    "start-dev": "node-red --userDir ./src --settings ./src/settings.js flow.json"
+  },
+  "properties": {
+    "org-id": "dex",
+    "device-type": "server"
+  },
+  "dependencies": {
+    "node-red": "^0.16.2",
+    "node-red-node-mongodb": "0.0.13"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-replace": "^1.0.1",
+    "os": "^0.1.1"
+  }
+}

@@ -1,0 +1,283 @@
+[{
+	"id": "75aa87d8.1db4f8",
+	"type": "tab",
+	"label": "Flow 1"
+},{
+	"id": "ad65b6aa.63a4b8",
+	"type": "tab",
+	"label": "Flow 2"
+},{
+	"id": "83391ffc.98fdc",
+	"type": "mqtt-broker",
+	"z": "",
+	"broker": "ethpi",
+	"port": "1883",
+	"clientid": "a:ORG_ID:DEVICE_ID",
+	"usetls": false,
+	"compatmode": true,
+	"keepalive": "60",
+	"cleansession": true,
+	"willTopic": "",
+	"willQos": "0",
+	"willPayload": "",
+	"birthTopic": "",
+	"birthQos": "0",
+	"birthPayload": ""
+},{
+	"id": "965898a2.0af548",
+	"type": "mqtt-broker",
+	"z": "",
+	"broker": "localhost",
+	"port": "1883",
+	"clientid": "a:ORG_ID:DEVICE_ID",
+	"usetls": false,
+	"compatmode": true,
+	"keepalive": "60",
+	"cleansession": true,
+	"willTopic": "",
+	"willQos": "0",
+	"willPayload": "",
+	"birthTopic": "",
+	"birthQos": "0",
+	"birthPayload": ""
+},{
+	"id": "cd3a6d2c.7d62",
+	"type": "mongodb",
+	"z": "",
+	"hostname": "ethpi",
+	"port": "27017",
+	"db": "peoplecount",
+	"name": ""
+},{
+	"id": "799c89a1.3a3688",
+	"type": "mongodb",
+	"z": "",
+	"hostname": "127.0.0.1",
+	"port": "27017",
+	"db": "peoplecount",
+	"name": ""
+},{
+	"id": "2295f587.37bfba",
+	"type": "http in",
+	"z": "75aa87d8.1db4f8",
+	"name": "HTTP start-count",
+	"url": "/start-count",
+	"method": "get",
+	"swaggerDoc": "",
+	"x": 167.5,
+	"y": 200,
+	"wires": [["ea636c11.e4c21",
+	"b5fe7422.2aa9b8"]]
+},{
+	"id": "69d98c35.013d84",
+	"type": "http response",
+	"z": "75aa87d8.1db4f8",
+	"name": "",
+	"x": 498.5,
+	"y": 276,
+	"wires": []
+},{
+	"id": "69daa54b.97a9ec",
+	"type": "mqtt out",
+	"z": "75aa87d8.1db4f8",
+	"name": "",
+	"topic": "cmd/DEVICE_ID/start-count",
+	"qos": "",
+	"retain": "",
+	"broker": "965898a2.0af548",
+	"x": 915.5,
+	"y": 137,
+	"wires": []
+},{
+	"id": "ea636c11.e4c21",
+	"type": "function",
+	"z": "75aa87d8.1db4f8",
+	"name": "Prepare response",
+	"func": "msg.payload.result = \"Start-count initiated\";\nreturn msg;",
+	"outputs": 1,
+	"noerr": 0,
+	"x": 297.5,
+	"y": 277,
+	"wires": [["69d98c35.013d84"]]
+},{
+	"id": "affee43c.d632c8",
+	"type": "function",
+	"z": "75aa87d8.1db4f8",
+	"name": "Set msg payload",
+	"func": "\nvar captureId = 1;\nif (msg.payload.length > 0) {\n    var match = msg.payload[0];\n    captureId = match.capture_id + 1;\n}\n\nvar newMsg = {\n    payload: {\n        capture_id: captureId,\n        create_date: new Date(),\n        counts: [],\n        total_count: 0\n    }\n};\n\nreturn newMsg;",
+	"outputs": 1,
+	"noerr": 0,
+	"x": 645.5,
+	"y": 170,
+	"wires": [["dfb24c51.2c1b3",
+	"69daa54b.97a9ec"]]
+},{
+	"id": "2bd0a5e5.a86b0a",
+	"type": "mongodb in",
+	"z": "75aa87d8.1db4f8",
+	"mongodb": "799c89a1.3a3688",
+	"name": "Find count-capture",
+	"collection": "count-capture",
+	"operation": "find",
+	"x": 533.5,
+	"y": 106,
+	"wires": [["affee43c.d632c8"]]
+},{
+	"id": "b5fe7422.2aa9b8",
+	"type": "function",
+	"z": "75aa87d8.1db4f8",
+	"name": "Setup query",
+	"func": "var msg = {\n    payload: {},\n    sort: {capture_id: -1},\n    limit: 1\n};\nreturn msg;",
+	"outputs": 1,
+	"noerr": 0,
+	"x": 380.5,
+	"y": 38,
+	"wires": [["2bd0a5e5.a86b0a"]]
+},{
+	"id": "3e906a6f.155276",
+	"type": "mqtt in",
+	"z": "ad65b6aa.63a4b8",
+	"name": "",
+	"topic": "evt/+/count-result",
+	"qos": "2",
+	"broker": "965898a2.0af548",
+	"x": 126.5,
+	"y": 181,
+	"wires": [["92162fe.c4c7fd"]]
+},{
+	"id": "f1df2a08.742a78",
+	"type": "function",
+	"z": "ad65b6aa.63a4b8",
+	"name": "Setup query",
+	"func": "msg.inMsg = msg.payload;\n\nmsg.payload = {\n    capture_id: msg.inMsg.capture_id\n};\ndelete msg.inMsg.capture_id;\n\nreturn msg;",
+	"outputs": 1,
+	"noerr": 0,
+	"x": 450.5,
+	"y": 164,
+	"wires": [["a43e4897.51e6e8"]]
+},{
+	"id": "a43e4897.51e6e8",
+	"type": "mongodb in",
+	"z": "ad65b6aa.63a4b8",
+	"mongodb": "799c89a1.3a3688",
+	"name": "Find count-capture",
+	"collection": "count-capture",
+	"operation": "find",
+	"x": 664.5,
+	"y": 226,
+	"wires": [["cf9f87ac.fa91b8"]]
+},{
+	"id": "cf9f87ac.fa91b8",
+	"type": "switch",
+	"z": "ad65b6aa.63a4b8",
+	"name": "Capture exists",
+	"property": "payload.length",
+	"propertyType": "msg",
+	"rules": [{
+		"t": "gt",
+		"v": "0",
+		"vt": "num"
+	},
+	{
+		"t": "else"
+	}],
+	"checkall": "true",
+	"outputs": 2,
+	"x": 843.5,
+	"y": 288,
+	"wires": [["956fb6a8.8acba8"],
+	["4ca8e686.fd8fd8"]]
+},{
+	"id": "956fb6a8.8acba8",
+	"type": "function",
+	"z": "ad65b6aa.63a4b8",
+	"name": "Update data",
+	"func": "var inMsg = msg.inMsg;\ninMsg.device_id = msg.senderId;\n\nif (msg.payload.length > 0) {\n    data = msg.payload[0];\n    data.counts.push(inMsg);\n    data.total_count += inMsg.count;\n    msg.payload = data;\n} else {\n    msg.payload = {};\n}\nreturn msg;",
+	"outputs": 1,
+	"noerr": 0,
+	"x": 596.5,
+	"y": 77,
+	"wires": [["bc31d908.532548",
+	"e71b9906.7a6028"]]
+},{
+	"id": "dfb24c51.2c1b3",
+	"type": "mongodb out",
+	"z": "75aa87d8.1db4f8",
+	"mongodb": "799c89a1.3a3688",
+	"name": "Insert count-capture",
+	"collection": "count-capture",
+	"payonly": true,
+	"upsert": false,
+	"multi": false,
+	"operation": "insert",
+	"x": 898.5,
+	"y": 210,
+	"wires": []
+},{
+	"id": "8328b28c.5936c",
+	"type": "debug",
+	"z": "ad65b6aa.63a4b8",
+	"name": "Debug topic msg",
+	"active": true,
+	"console": "false",
+	"complete": "true",
+	"x": 486.5,
+	"y": 304,
+	"wires": []
+},{
+	"id": "bc31d908.532548",
+	"type": "debug",
+	"z": "ad65b6aa.63a4b8",
+	"name": "Debug data",
+	"active": true,
+	"console": "false",
+	"complete": "true",
+	"x": 770.5,
+	"y": 78,
+	"wires": []
+},{
+	"id": "e71b9906.7a6028",
+	"type": "mongodb out",
+	"z": "ad65b6aa.63a4b8",
+	"mongodb": "799c89a1.3a3688",
+	"name": "Save count-capture",
+	"collection": "count-capture",
+	"payonly": true,
+	"upsert": false,
+	"multi": false,
+	"operation": "store",
+	"x": 860.5,
+	"y": 150,
+	"wires": []
+},{
+	"id": "4ca8e686.fd8fd8",
+	"type": "debug",
+	"z": "ad65b6aa.63a4b8",
+	"name": "Debug otherwise",
+	"active": true,
+	"console": "false",
+	"complete": "true",
+	"x": 872.5,
+	"y": 400,
+	"wires": []
+},{
+	"id": "92162fe.c4c7fd",
+	"type": "json",
+	"z": "ad65b6aa.63a4b8",
+	"name": "",
+	"x": 313.5,
+	"y": 254,
+	"wires": [["8328b28c.5936c",
+	"6abeb17a.f00ed"]]
+},{
+	"id": "6abeb17a.f00ed",
+	"type": "function",
+	"z": "ad65b6aa.63a4b8",
+	"name": "Init MQTT",
+	"func": "msg.senderId = msg.topic.replace(/evt\\/(.*)\\/.*/g, \"$1\");\nreturn msg;",
+	"outputs": 1,
+	"noerr": 0,
+	"x": 262.5,
+	"y": 94,
+	"wires": [["f1df2a08.742a78"]]
+}]

@@ -1,2 +1,5 @@
 dist
 node_modules
+*.backup
+npm-debug.log
+.config.json

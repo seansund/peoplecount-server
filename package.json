@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "start": "grunt && node-red --userDir ./dist --settings ./dist/settings.js flow.json",
-    "start-dev": "node-red --userDir ./src --settings ./src/settings.js flow.json"
+    "start": "grunt && node node_modules/node-red/red.js --userDir ./dist --settings ./dist/settings.js flow.json",
+    "start-dev": "node node_modules/node-red/red.js --userDir ./src --settings ./src/settings.js flow.json"
   },
   "properties": {
     "org-id": "dex",
@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "grunt": "^1.0.1",
+    "grunt-cli": "^1.2.0",
     "grunt-replace": "^1.0.1",
     "os": "^0.1.1"
   }

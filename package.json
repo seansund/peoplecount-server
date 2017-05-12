@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
   	"setup": "grunt",
+  	"initdb": "mongo < db/initdb.js",
     "start": "grunt && node node_modules/node-red/red.js --userDir ./dist --settings ./dist/settings.js flow.json",
     "start-dev": "node node_modules/node-red/red.js --userDir ./src --settings ./src/settings.js flow.json"
   },

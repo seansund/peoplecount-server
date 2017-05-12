@@ -10,7 +10,8 @@
   },
   "properties": {
     "org-id": "dex",
-    "device-type": "server"
+    "device-type": "server",
+    "broker-host": "minibian"
   },
   "dependencies": {
     "node-red": "^0.16.2",

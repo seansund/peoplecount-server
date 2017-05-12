@@ -32,7 +32,7 @@ module.exports = function(grunt) {
 						},
 						{
 							match: /"broker": "localhost"/g,
-							replacement: '"broker": "ethpi"'
+							replacement: '"broker": "<%= pkg.properties["broker-host"] %>"'
 						}
 					]
 				},

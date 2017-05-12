@@ -1,11 +1,11 @@
 [{
 	"id": "75aa87d8.1db4f8",
 	"type": "tab",
-	"label": "Flow 1"
+	"label": "Initiate"
 },{
 	"id": "ad65b6aa.63a4b8",
 	"type": "tab",
-	"label": "Flow 2"
+	"label": "Update count"
 },{
 	"id": "965898a2.0af548",
 	"type": "mqtt-broker",
@@ -49,15 +49,14 @@
 	"swaggerDoc": "",
 	"x": 167.5,
 	"y": 200,
-	"wires": [["ea636c11.e4c21",
-	"b5fe7422.2aa9b8"]]
+	"wires": [["b5fe7422.2aa9b8"]]
 },{
 	"id": "69d98c35.013d84",
 	"type": "http response",
 	"z": "75aa87d8.1db4f8",
 	"name": "",
-	"x": 498.5,
-	"y": 276,
+	"x": 665.5,
+	"y": 366,
 	"wires": []
 },{
 	"id": "69daa54b.97a9ec",
@@ -76,18 +75,18 @@
 	"type": "function",
 	"z": "75aa87d8.1db4f8",
 	"name": "Prepare response",
-	"func": "msg.payload.result = \"Start-count initiated\";\nreturn msg;",
+	"func": "msg.payload = {\n    result: \"Start-count initiated for capture: \" + msg.captureId\n};\nreturn msg;",
 	"outputs": 1,
 	"noerr": 0,
-	"x": 297.5,
-	"y": 277,
+	"x": 409.5,
+	"y": 367,
 	"wires": [["69d98c35.013d84"]]
 },{
 	"id": "affee43c.d632c8",
 	"type": "function",
 	"z": "75aa87d8.1db4f8",
 	"name": "Set msg payload",
-	"func": "\nvar captureId = 1;\nif (msg.payload.length > 0) {\n    var match = msg.payload[0];\n    captureId = match.capture_id + 1;\n}\n\nvar newMsg = {\n    payload: {\n        capture_id: captureId,\n        create_date: new Date(),\n        counts: [],\n        total_count: 0\n    }\n};\n\nreturn newMsg;",
+	"func": "var newMsg = {\n    payload: {\n        captureId: msg.captureId,\n        createDate: new Date(),\n        totalCount: 0\n    }\n};\n\nreturn newMsg;",
 	"outputs": 1,
 	"noerr": 0,
 	"x": 645.5,
@@ -100,17 +99,17 @@
 	"z": "75aa87d8.1db4f8",
 	"mongodb": "799c89a1.3a3688",
 	"name": "Find count-capture",
-	"collection": "count-capture",
+	"collection": "countcapture",
 	"operation": "find",
 	"x": 533.5,
 	"y": 106,
-	"wires": [["affee43c.d632c8"]]
+	"wires": [["12efb97.853c347"]]
 },{
 	"id": "b5fe7422.2aa9b8",
 	"type": "function",
 	"z": "75aa87d8.1db4f8",
 	"name": "Setup query",
-	"func": "var msg = {\n    payload: {},\n    sort: {capture_id: -1},\n    limit: 1\n};\nreturn msg;",
+	"func": "msg.payload = {};\nmsg.sort = {captureId: -1};\nmsg.limit = 1;\n\nreturn msg;",
 	"outputs": 1,
 	"noerr": 0,
 	"x": 380.5,
@@ -132,7 +131,7 @@
 	"type": "function",
 	"z": "ad65b6aa.63a4b8",
 	"name": "Setup query",
-	"func": "msg.inMsg = msg.payload;\n\nmsg.payload = {\n    capture_id: msg.inMsg.capture_id\n};\ndelete msg.inMsg.capture_id;\n\nreturn msg;",
+	"func": "msg.inMsg = msg.payload;\n\nmsg.payload = {\n    captureId: msg.inMsg.captureId\n};\n\nreturn msg;",
 	"outputs": 1,
 	"noerr": 0,
 	"x": 450.5,
@@ -144,7 +143,7 @@
 	"z": "ad65b6aa.63a4b8",
 	"mongodb": "799c89a1.3a3688",
 	"name": "Find count-capture",
-	"collection": "count-capture",
+	"collection": "countcapture",
 	"operation": "find",
 	"x": 664.5,
 	"y": 226,
@@ -175,20 +174,22 @@
 	"type": "function",
 	"z": "ad65b6aa.63a4b8",
 	"name": "Update data",
-	"func": "var inMsg = msg.inMsg;\ninMsg.device_id = msg.senderId;\n\nif (msg.payload.length > 0) {\n    data = msg.payload[0];\n    data.counts.push(inMsg);\n    data.total_count += inMsg.count;\n    msg.payload = data;\n} else {\n    msg.payload = {};\n}\nreturn msg;",
-	"outputs": 1,
+	"func": "var inMsg = msg.inMsg;\n\nif (msg.payload.length > 0) {\n    data = msg.payload[0];\n    data.totalCount += inMsg.count;\n    inMsg.countcapture_id = data._id;\n    msg.payload = data;\n} else {\n    msg.payload = {};\n}\n\nvar deviceMsg = {\n    payload: inMsg\n};\n\nreturn [msg, deviceMsg];",
+	"outputs": "2",
 	"noerr": 0,
 	"x": 596.5,
 	"y": 77,
 	"wires": [["bc31d908.532548",
-	"e71b9906.7a6028"]]
+	"e71b9906.7a6028"],
+	["1a6a91ef.533a4e",
+	"e546c088.47248"]]
 },{
 	"id": "dfb24c51.2c1b3",
 	"type": "mongodb out",
 	"z": "75aa87d8.1db4f8",
 	"mongodb": "799c89a1.3a3688",
 	"name": "Insert count-capture",
-	"collection": "count-capture",
+	"collection": "countcapture",
 	"payonly": true,
 	"upsert": false,
 	"multi": false,
@@ -215,8 +216,8 @@
 	"active": true,
 	"console": "false",
 	"complete": "true",
-	"x": 770.5,
-	"y": 78,
+	"x": 860.5,
+	"y": 27,
 	"wires": []
 },{
 	"id": "e71b9906.7a6028",
@@ -224,13 +225,13 @@
 	"z": "ad65b6aa.63a4b8",
 	"mongodb": "799c89a1.3a3688",
 	"name": "Save count-capture",
-	"collection": "count-capture",
+	"collection": "countcapture",
 	"payonly": true,
 	"upsert": false,
 	"multi": false,
 	"operation": "store",
-	"x": 860.5,
-	"y": 150,
+	"x": 879.5,
+	"y": 68,
 	"wires": []
 },{
 	"id": "4ca8e686.fd8fd8",
@@ -251,16 +252,60 @@
 	"x": 313.5,
 	"y": 254,
 	"wires": [["8328b28c.5936c",
-	"6abeb17a.f00ed"]]
+	"f1df2a08.742a78"]]
 },{
-	"id": "6abeb17a.f00ed",
+	"id": "12efb97.853c347",
 	"type": "function",
-	"z": "ad65b6aa.63a4b8",
-	"name": "Init MQTT",
-	"func": "msg.senderId = msg.topic.replace(/evt\\/(.*)\\/.*/g, \"$1\");\nreturn msg;",
+	"z": "75aa87d8.1db4f8",
+	"name": "Get captureId",
+	"func": "\nvar captureId = 1;\nif (msg.payload.length > 0) {\n    var match = msg.payload[0];\n    captureId = match.captureId + 1;\n}\nmsg.captureId = captureId;\n\nreturn msg;",
 	"outputs": 1,
 	"noerr": 0,
-	"x": 262.5,
-	"y": 94,
-	"wires": [["f1df2a08.742a78"]]
+	"x": 437.5,
+	"y": 214,
+	"wires": [["affee43c.d632c8",
+	"ea636c11.e4c21"]]
+},{
+	"id": "712dbc05.9bed84",
+	"type": "comment",
+	"z": "75aa87d8.1db4f8",
+	"name": "Output message format",
+	"info": "The payload of the output message will have the following properties:\n\n* captureId - The unique identifier for this capture\n* captureDate - The timestamp when the capture was initiated\n* totalCount - Initially '0', this will contain the total count returned by the devices.\n* counts - Initially empty, this will contain the count data returned by the devices.",
+	"x": 822.5,
+	"y": 81,
+	"wires": []
+},{
+	"id": "1a6a91ef.533a4e",
+	"type": "mongodb out",
+	"z": "ad65b6aa.63a4b8",
+	"mongodb": "799c89a1.3a3688",
+	"name": "Insert count-capture-device",
+	"collection": "countcapturedevice",
+	"payonly": true,
+	"upsert": false,
+	"multi": false,
+	"operation": "insert",
+	"x": 911.5,
+	"y": 164,
+	"wires": []
+},{
+	"id": "e546c088.47248",
+	"type": "debug",
+	"z": "ad65b6aa.63a4b8",
+	"name": "Debug device msg",
+	"active": true,
+	"console": "false",
+	"complete": "true",
+	"x": 878.5,
+	"y": 123,
+	"wires": []
+},{
+	"id": "87e83bfc.c2ab38",
+	"type": "comment",
+	"z": "ad65b6aa.63a4b8",
+	"name": "Input message format",
+	"info": "The payload of the input msg contains the following elements:\n* **captureId** - The identifer for this capture set.\n* **deviceId** - The unique identifier for the device that captured the image. The combination of captureId and deviceId should be unique.\n* **filepath** - The path to the image file.\n* **filename** - The name of the image file.\n* **count** - The number of items in the image file.",
+	"x": 138.5,
+	"y": 295,
+	"wires": []
 }]

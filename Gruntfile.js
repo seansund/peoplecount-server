@@ -22,7 +22,7 @@ module.exports = function(grunt) {
 						},
 						{
 							match: /disableEditor: false/g,
-							replacement: 'disableEditor: true'
+							replacement: 'disableEditor: <%= pkg.properties["disable-editor"] %>'
 						},
 						{
 							match: /(uiPort: process.env.PORT .. )(188\d)/g,
